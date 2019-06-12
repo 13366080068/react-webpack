@@ -1,0 +1,14 @@
+.home {
+    height: 80vh;
+    transform: rotate(3deg);
+    background: url('./timg.jpg') no-repeat;
+    .h-txt {
+        margin-top: 100px;
+        color: red;
+    }
+}
+
+// 下边这个会被CSS tree shaking 过滤掉哦，是不是很神奇
+.mm {
+    background: red;
+}
