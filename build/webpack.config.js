@@ -1,5 +1,8 @@
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const PurifyCSS = require('purifycss-webpack')
+const glob = require('glob-all')
 
 module.exports = {
     mode: "development",
@@ -20,6 +23,12 @@ module.exports = {
             router: path.join(__dirname, "src/router")
           }
     },
+    optimization: {
+        usedExports: true,
+        splitChunks: {
+            chunks: "all", // 所有的 chunks 代码公共的部分分离出来成为一个单独的文件
+        }
+    },
     module: {
         rules: [
             {
@@ -35,6 +44,7 @@ module.exports = {
                 test: /\.scss$/,
                 use: [
                     "style-loader", // 创建style标签，并将css添加进去
+                    MiniCssExtractPlugin.loader,
                     "css-loader", // 编译css
                     "postcss-loader",
                     "sass-loader" // 编译scss
@@ -72,7 +82,34 @@ module.exports = {
             filename: 'index.html', // 最终创建的文件名
             template: path.join(__dirname, 'src/template.html') // 指定模版路径
         }),
-        new webpack.HotModuleReplacementPlugin()
+        new webpack.HotModuleReplacementPlugin(),
+        new MiniCssExtractPlugin({
+            filename: "[name].css",
+            chunkFilename: "[id].css"
+        }),
+        new webpack.ProvidePlugin({
+            $: 'jquery', // npm
+            jQuery: 'jQuery' // 本地Js文件
+        }),
+        new webpack.DefinePlugin({
+            'process.env': {
+                VUEP_BASE_URL: JSON.stringify('http://localhost:9000')
+            }
+        }),
+        // 清除无用 css
+        new PurifyCSS({
+            paths: glob.sync([
+                // 要做 CSS Tree Shaking 的路径文件
+                path.resolve(__dirname, './src/*.html'), // 请注意，我们同样需要对 html 文件进行 tree shaking
+                path.resolve(__dirname, './src/*.js')
+            ])
+        }),
+        new AddAssetHtmlWebpackPlugin({
+            filepath: path.resolve(__dirname, '../dll/jquery.dll.js') // 对应的dll文件路径
+        }),
+        new webpack.DllReferencePlugin({
+            manifest: path.resolve(__dirname, '..', 'dll/jquery-manifest.json')
+        })
     ],
     devServer: {
         hot: true,
