@@ -1,4 +1,5 @@
 {
     "presets": ["@babel/preset-env", { "useBuiltIns": "usage" }, "@babel/preset-react"],
-    "plugins": ["@babel/plugin-transform-runtime"]
+    // react-hot-loader在--hot基础上做了额外的处理，来保证状态可以存下来
+    "plugins": ["@babel/plugin-transform-runtime", "react-hot-loader/babel"]
 }
